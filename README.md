@@ -3,10 +3,10 @@
 A modern, production-quality **Pomodoro productivity web application** built with **React, TypeScript, Vite, Tailwind CSS, Framer Motion, Zustand, and Recharts**.
 
 FocusForge helps you stay focused, organize tasks, build consistent work habits, and visualize your productivity with a beautiful, premium interface.
-<img width="500" height="280" alt="image" src="https://github.com/user-attachments/assets/20b0f272-2d70-463c-9147-af990f4f06c7" />
-<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/61d306d7-3637-433c-bd04-823aa57b5ba8" />
-<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/01793bb1-4b53-4669-9030-40083ff07b5d" />
-<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/da93c4b2-8360-45f7-9399-147c76fa803c" />
+<img width="470" height="280" alt="image" src="https://github.com/user-attachments/assets/20b0f272-2d70-463c-9147-af990f4f06c7" />
+<img width="470" height="280" alt="image" src="https://github.com/user-attachments/assets/61d306d7-3637-433c-bd04-823aa57b5ba8" />
+<img width="470" height="280" alt="image" src="https://github.com/user-attachments/assets/01793bb1-4b53-4669-9030-40083ff07b5d" />
+<img width="470" height="280" alt="image" src="https://github.com/user-attachments/assets/da93c4b2-8360-45f7-9399-147c76fa803c" />
 
 > **No account required. No backend. No cloud.**
 > Everything is stored securely in your browser using **LocalStorage**.
