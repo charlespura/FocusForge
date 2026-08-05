@@ -9,7 +9,7 @@ import {
   Settings 
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useThemeStore } from '../../store/themeStore.ts';
+import { useThemeStore } from '../../store/themeStore';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },

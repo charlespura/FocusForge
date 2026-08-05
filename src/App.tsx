@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useThemeStore } from './store/themeStore';
 import { Layout } from './components/layout/Layout';
@@ -19,7 +19,7 @@ function App() {
   }, [theme]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Layout>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -31,7 +31,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
