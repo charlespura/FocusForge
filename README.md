@@ -3,6 +3,8 @@
 A modern, production-quality **Pomodoro productivity web application** built with **React, TypeScript, Vite, Tailwind CSS, Framer Motion, Zustand, and Recharts**.
 
 FocusForge helps you stay focused, organize tasks, build consistent work habits, and visualize your productivity with a beautiful, premium interface.
+
+
 <img width="450" height="250" alt="image" src="https://github.com/user-attachments/assets/20b0f272-2d70-463c-9147-af990f4f06c7" />
 <img width="450" height="250" alt="image" src="https://github.com/user-attachments/assets/61d306d7-3637-433c-bd04-823aa57b5ba8" />
 <img width="450" height="250" alt="image" src="https://github.com/user-attachments/assets/01793bb1-4b53-4669-9030-40083ff07b5d" />
