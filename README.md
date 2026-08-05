@@ -1,75 +1,179 @@
-# React + TypeScript + Vite
+# FocusForge 🍅
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, production-quality **Pomodoro productivity web application** built with **React, TypeScript, Vite, Tailwind CSS, Framer Motion, Zustand, and Recharts**.
 
-Currently, two official plugins are available:
+FocusForge helps you stay focused, organize tasks, build consistent work habits, and visualize your productivity with a beautiful, premium interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> **No account required. No backend. No cloud.**
+> Everything is stored securely in your browser using **LocalStorage**.
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🍅 Pomodoro Timer
+- Animated circular progress timer
+- Focus, Short Break, Long Break
+- Start, Pause, Resume, Reset, Skip
+- Auto-switch between sessions
+- Fullscreen Focus Mode
+- Keyboard shortcuts
+- Browser notifications
+- Session tracking
 
-## Expanding the ESLint configuration
+### ✅ Task Management
+- Create, edit, delete tasks
+- Drag & drop reordering
+- Priorities
+- Categories
+- Due dates
+- Pomodoro estimation
+- Progress tracking
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🎯 Daily Goals
+- Daily Pomodoro target
+- Progress ring
+- Goal completion tracking
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 📊 Productivity Dashboard
+- Daily, weekly, monthly statistics
+- Focus hours
+- Sessions completed
+- Task completion
+- Charts powered by Recharts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 🔥 Streak Tracking
+- Current streak
+- Longest streak
+- Milestones
+- Activity history
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 📝 Focus Notes
+- Markdown notes
+- Search
+- Pin notes
+- Auto-save
 
+### 🌙 Themes
+Light, Dark, AMOLED, Ocean, Forest, Lavender, Warm Sand, Midnight.
+
+### 🏆 Achievements
+Unlock achievements as you build productive habits.
+
+### 📱 Progressive Web App
+- Installable
+- Offline support
+- Responsive
+- Works without internet
+
+## 🚀 Tech Stack
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+- Zustand
+- React Router
+- Recharts
+- React Markdown
+- Lucide React
+- LocalStorage
+
+## 📦 Installation
+
+```bash
+git clone https://github.com/charlespura/FocusForge.git
+cd FocusForge
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Production:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build
+npm run preview
 ```
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+|------|--------|
+| Space | Start / Pause |
+| R | Reset |
+| S | Skip |
+| F | Fullscreen |
+| Esc | Exit Fullscreen |
+
+## 📁 Project Structure
+
+```text
+src/
+ ├── components/
+ ├── pages/
+ ├── store/
+ ├── hooks/
+ ├── utils/
+ ├── types/
+ ├── assets/
+ ├── styles/
+ ├── App.tsx
+ └── main.tsx
+```
+
+## 🎨 Design Philosophy
+
+FocusForge embraces a calm, distraction-free workspace.
+
+- Minimal interface
+- Premium desktop aesthetic
+- Soft tomato accent
+- Generous whitespace
+- Smooth animations
+- Responsive layouts
+- Accessibility-first
+
+## ♿ Accessibility
+
+- Keyboard navigation
+- High contrast
+- ARIA labels
+- Screen reader support
+- Reduced motion support
+
+## 💾 Data Storage
+
+Everything is stored locally using LocalStorage.
+
+- Tasks
+- Notes
+- Statistics
+- Goals
+- Themes
+- Achievements
+- Preferences
+
+No user account required.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit changes
+4. Push your branch
+5. Open a Pull Request
+
+## 📄 License
+
+Licensed under the MIT License.
+
+## 👨‍💻 Author
+
+**Charles Pura**
+
+GitHub:
+https://github.com/charlespura
+
+Project:
+https://github.com/charlespura/FocusForge
+
+If you enjoy this project, consider giving it a ⭐.
