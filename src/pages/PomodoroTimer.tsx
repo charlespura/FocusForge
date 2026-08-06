@@ -199,8 +199,68 @@ export function PomodoroTimer() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md space-y-8"
+        className="w-full max-w-4xl space-y-8"
       >
+        {/* Video Background Section - Full width hero like Dashboard */}
+        <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] bg-black/90">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover opacity-70"
+            style={{ objectPosition: 'center 40%' }}
+          >
+            <source src="/FocusForge/forge2.mp4" type="video/mp4" />
+          </video>
+          
+          {/* Enhanced gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="px-6 md:px-10 text-white max-w-4xl"
+            >
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+              >
+                Pomodoro Timer
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
+              >
+                {isRunning ? 'Focus session in progress... 🎯' : 'Ready to focus? 🚀'}
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="mt-6 flex justify-center gap-4 flex-wrap"
+              >
+                <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                  ⏱️ {getModeLabel()}
+                </span>
+                <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                  {completedSessions} sessions completed
+                </span>
+                {isRunning && (
+                  <span className="px-4 py-2 bg-red-500/30 backdrop-blur-sm rounded-full text-sm border border-red-500/30 animate-pulse">
+                    🔴 Live
+                  </span>
+                )}
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Timer Controls */}
         <div className="text-center">
           <motion.h2
             key={mode}
@@ -323,8 +383,5 @@ export function PomodoroTimer() {
     </div>
   );
 }
-// ... all the existing code ...
 
-// Add this at the very end of the file
 export default PomodoroTimer;
-
