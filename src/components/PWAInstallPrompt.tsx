@@ -79,9 +79,12 @@ export function PWAInstallPrompt() {
       >
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-800 p-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
-              F
-            </div>
+            {/* Logo - using PNG image instead of text */}
+            <img 
+              src="public/iconslogo.png" 
+              alt="FocusForge Logo" 
+              className="w-12 h-12 rounded-xl object-cover shadow-lg flex-shrink-0"
+            />
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 dark:text-white">Install FocusForge</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

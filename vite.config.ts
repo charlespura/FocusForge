@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'iconslogo.png', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'FocusForge - Pomodoro Productivity',
         short_name: 'FocusForge',
@@ -16,17 +16,17 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        scope: './',
-        start_url: './',
+        scope: '/FocusForge/',
+        start_url: '/FocusForge/',
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'iconslogo.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable'
           },
           {
-            src: 'icon-512.png',
+            src: 'iconslogo.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
