@@ -81,7 +81,7 @@ export function PWAInstallPrompt() {
           <div className="flex items-start gap-4">
             {/* Logo - using PNG image instead of text */}
             <img 
-              src="public/iconslogo.png" 
+              src="iconslogo.png" 
               alt="FocusForge Logo" 
               className="w-12 h-12 rounded-xl object-cover shadow-lg flex-shrink-0"
             />
