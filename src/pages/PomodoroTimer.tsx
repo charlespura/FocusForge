@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, SkipForward, Maximize2 } from 'lucide-react';
 import { useTimerStore } from '../store/timerStore';
@@ -6,9 +6,8 @@ import { useTaskStore } from '../store/taskStore';
 import { useStatisticsStore } from '../store/statisticsStore';
 import { useGoalStore } from '../store/goalStore';
 import { useAchievementStore } from '../store/achievementStore';
+import { useGlobalTimerStore } from '../store/globalTimerStore';
 import { cn } from '../utils/cn';
-
-type TimerMode = 'focus' | 'short-break' | 'long-break';
 
 export function PomodoroTimer() {
   const { settings } = useTimerStore();
@@ -17,17 +16,22 @@ export function PomodoroTimer() {
   const { incrementProgress } = useGoalStore();
   const { unlockAchievement } = useAchievementStore();
 
-  const [mode, setMode] = useState<TimerMode>('focus');
-  const [timeLeft, setTimeLeft] = useState(settings.focusTime * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [completedSessions, setCompletedSessions] = useState(0);
-  const [selectedTask, setSelectedTask] = useState<string>('');
-  const timerRef = useRef<number | null>(null);
+  // Use global timer state
+  const {
+    mode,
+    timeLeft,
+    isRunning,
+    completedSessions,
+    selectedTask,
+    toggleTimer,
+    resetTimer,
+    skipTimer,
+    setSelectedTask,
+  } = useGlobalTimerStore();
 
-  const totalTime = mode === 'focus' ? settings.focusTime * 60 : 
-                    mode === 'short-break' ? settings.shortBreak * 60 : 
-                    settings.longBreak * 60;
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const totalTime = useGlobalTimerStore((state) => state.totalTime);
+
   const progress = ((totalTime - timeLeft) / totalTime) * 100;
 
   const getModeColor = () => {
@@ -53,84 +57,12 @@ export function PomodoroTimer() {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  const switchMode = useCallback((newMode: TimerMode) => {
-    setMode(newMode);
-    const durations = {
-      focus: settings.focusTime * 60,
-      'short-break': settings.shortBreak * 60,
-      'long-break': settings.longBreak * 60,
-    };
-    setTimeLeft(durations[newMode]);
-    setIsRunning(false);
-  }, [settings]);
+  // Wrap handleSkipTimer in useCallback to prevent unnecessary re-renders
+  const handleSkipTimer = useCallback(() => {
+    skipTimer(settings, incrementPomodoros, incrementSessions, addFocusTime, incrementProgress, updateStreak, unlockAchievement);
+  }, [skipTimer, settings, incrementPomodoros, incrementSessions, addFocusTime, incrementProgress, updateStreak, unlockAchievement]);
 
-  const toggleTimer = useCallback(() => {
-    setIsRunning(prev => !prev);
-  }, []);
-
-  const resetTimer = useCallback(() => {
-    const durations = {
-      focus: settings.focusTime * 60,
-      'short-break': settings.shortBreak * 60,
-      'long-break': settings.longBreak * 60,
-    };
-    setTimeLeft(durations[mode]);
-    setIsRunning(false);
-  }, [settings, mode]);
-
-  const skipTimer = useCallback(() => {
-    if (mode === 'focus') {
-      const sessionCount = completedSessions + 1;
-      setCompletedSessions(sessionCount);
-
-      if (selectedTask) {
-        incrementPomodoros(selectedTask);
-      }
-
-      incrementSessions();
-      addFocusTime(settings.focusTime);
-      incrementProgress();
-      updateStreak(new Date().toISOString().split('T')[0]);
-
-      // Check achievements
-      const totalSessions = sessionCount;
-      if (totalSessions === 1) unlockAchievement('first-focus');
-      if (totalSessions === 10) unlockAchievement('10-sessions');
-      if (totalSessions === 50) unlockAchievement('50-sessions');
-      if (totalSessions === 100) unlockAchievement('100-sessions');
-      if (totalSessions === 500) unlockAchievement('500-sessions');
-      if (totalSessions === 1000) unlockAchievement('1000-sessions');
-
-      if (sessionCount % 4 === 0) {
-        switchMode('long-break');
-      } else {
-        switchMode('short-break');
-      }
-
-      if (settings.autoStartBreak) {
-        setTimeout(() => setIsRunning(true), 100);
-      }
-    } else {
-      switchMode('focus');
-      if (settings.autoStartFocus) {
-        setTimeout(() => setIsRunning(true), 100);
-      }
-    }
-  }, [
-    mode,
-    completedSessions,
-    selectedTask,
-    settings,
-    incrementPomodoros,
-    incrementSessions,
-    addFocusTime,
-    incrementProgress,
-    updateStreak,
-    unlockAchievement,
-    switchMode,
-  ]);
-
-  const toggleFullscreen = useCallback(() => {
+  const handleToggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
       setIsFullscreen(true);
@@ -138,30 +70,14 @@ export function PomodoroTimer() {
       document.exitFullscreen();
       setIsFullscreen(false);
     }
-  }, []);
+  };
 
-  // Timer effect
+  // Check if timer finished - include handleSkipTimer in dependencies
   useEffect(() => {
-    if (isRunning) {
-      timerRef.current = window.setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            skipTimer();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else if (timerRef.current) {
-      clearInterval(timerRef.current);
+    if (timeLeft <= 0) {
+      handleSkipTimer();
     }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isRunning, skipTimer]);
+  }, [timeLeft, isRunning, handleSkipTimer]);
 
   // Keyboard shortcuts effect
   useEffect(() => {
@@ -174,10 +90,10 @@ export function PomodoroTimer() {
         resetTimer();
       }
       if (e.key === 's' || e.key === 'S') {
-        skipTimer();
+        handleSkipTimer();
       }
       if (e.key === 'f' || e.key === 'F') {
-        toggleFullscreen();
+        handleToggleFullscreen();
       }
       if (e.key === 'Escape') {
         if (document.fullscreenElement) {
@@ -189,7 +105,7 @@ export function PomodoroTimer() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleTimer, resetTimer, skipTimer, toggleFullscreen]);
+  }, [toggleTimer, resetTimer, handleSkipTimer]);
 
   return (
     <div className={cn(
@@ -201,7 +117,7 @@ export function PomodoroTimer() {
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-4xl space-y-8"
       >
-        {/* Video Background Section - Full width hero like Dashboard */}
+        {/* Video Background Section */}
         <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] bg-black/90">
           <video
             autoPlay
@@ -214,7 +130,6 @@ export function PomodoroTimer() {
             <source src="/FocusForge/forge2.mp4" type="video/mp4" />
           </video>
           
-          {/* Enhanced gradient overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -353,7 +268,7 @@ export function PomodoroTimer() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={skipTimer}
+            onClick={handleSkipTimer}
             className="w-14 h-14 rounded-full bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors flex items-center justify-center"
           >
             <SkipForward className="w-6 h-6" />
@@ -362,7 +277,7 @@ export function PomodoroTimer() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={toggleFullscreen}
+            onClick={handleToggleFullscreen}
             className="w-14 h-14 rounded-full bg-gray-200 dark:bg-zinc-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors flex items-center justify-center"
           >
             <Maximize2 className="w-5 h-5" />
