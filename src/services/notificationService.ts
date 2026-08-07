@@ -8,6 +8,7 @@ interface NotificationPayload {
 
 class NotificationService {
   private permission: NotificationPermission | null = null;
+  private audioContext: AudioContext | null = null;
 
   constructor() {
     this.init();
@@ -29,6 +30,23 @@ class NotificationService {
     }
 
     this.permission = NotificationAPI.permission;
+  }
+
+  private getAudioContext() {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    const AudioContextConstructor = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextConstructor) {
+      return null;
+    }
+
+    if (!this.audioContext) {
+      this.audioContext = new AudioContextConstructor();
+    }
+
+    return this.audioContext;
   }
 
   async requestPermission(): Promise<boolean> {
@@ -94,6 +112,71 @@ class NotificationService {
       return true;
     } catch (error) {
       console.error('Error sending notification:', error);
+      return false;
+    }
+  }
+
+  async primeAlarmSound(): Promise<boolean> {
+    const audioContext = this.getAudioContext();
+    if (!audioContext) {
+      return false;
+    }
+
+    try {
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error preparing alarm sound:', error);
+      return false;
+    }
+  }
+
+  async playAlarmSound(): Promise<boolean> {
+    const audioContext = this.getAudioContext();
+    if (!audioContext) {
+      return false;
+    }
+
+    try {
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+
+      const gainNode = audioContext.createGain();
+      gainNode.gain.value = 0.0001;
+      gainNode.connect(audioContext.destination);
+
+      const notes = [
+        { frequency: 880, start: 0, duration: 0.18 },
+        { frequency: 1046, start: 0.22, duration: 0.18 },
+        { frequency: 1318, start: 0.44, duration: 0.24 },
+      ];
+
+      notes.forEach(({ frequency, start, duration }) => {
+        const oscillator = audioContext.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency;
+        oscillator.connect(gainNode);
+
+        const now = audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0.0001, now + start);
+        gainNode.gain.exponentialRampToValueAtTime(0.12, now + start + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + start + duration);
+
+        oscillator.start(now + start);
+        oscillator.stop(now + start + duration + 0.02);
+      });
+
+      window.setTimeout(() => {
+        gainNode.disconnect();
+      }, 1000);
+
+      return true;
+    } catch (error) {
+      console.error('Error playing alarm sound:', error);
       return false;
     }
   }

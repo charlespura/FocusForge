@@ -96,6 +96,7 @@ export const useGlobalTimerStore = create<GlobalTimerState>()(
             startTime: Date.now(),
             totalTime: state.timeLeft,
           });
+          notificationService.primeAlarmSound();
           setTimerTitle(state.timeLeft);
           window.dispatchEvent(new CustomEvent('timerUpdate', {
             detail: { timeLeft: state.timeLeft, isRunning: true, mode: state.mode },
@@ -213,6 +214,10 @@ export const useGlobalTimerStore = create<GlobalTimerState>()(
 
         if (newTimeLeft <= 0) {
           const { settings } = useTimerStore.getState();
+          if (settings.alarmSound) {
+            notificationService.playAlarmSound();
+          }
+
           if (settings.notifications) {
             const nextMode = state.mode === 'focus' ? 'break' : 'focus';
             notificationService.sendTimerCompleteNotification(nextMode, state.completedSessions + (state.mode === 'focus' ? 1 : 0));
