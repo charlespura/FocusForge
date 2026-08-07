@@ -44,10 +44,67 @@ export function Analytics() {
 
   return (
     <div className="space-y-8">
+      {/* Video Background Section - Full width hero like Dashboard */}
+      <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] mb-8 bg-black/90">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-70"
+          style={{ objectPosition: 'center 40%' }}
+        >
+          <source src="/FocusForge/forge4.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Enhanced gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="px-6 md:px-10 text-white max-w-4xl"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+            >
+              Analytics Dashboard
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
+            >
+              Track your productivity and achieve your goals
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mt-6 flex justify-center gap-4 flex-wrap"
+            >
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                📊 Real-time Stats
+              </span>
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                📈 Track Progress
+              </span>
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                🎯 Achieve Goals
+              </span>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
         <p className="text-gray-500 dark:text-gray-400">Track your productivity metrics</p>
@@ -64,10 +121,10 @@ export function Analytics() {
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="bg-white dark:bg-zinc-800/50 rounded-2xl p-6 border border-gray-200 dark:border-zinc-700"
+            transition={{ duration: 0.5, delay: index * 0.1 + 0.4 }}
+            className="bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm rounded-2xl p-6 hover:shadow-lg transition-shadow border border-gray-200 dark:border-zinc-700 hover:scale-105 duration-300"
           >
-            <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.label}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
           </motion.div>
         ))}
@@ -77,8 +134,8 @@ export function Analytics() {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-white dark:bg-zinc-800/50 rounded-2xl p-6 border border-gray-200 dark:border-zinc-700"
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-zinc-700 hover:shadow-lg transition-shadow"
         >
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Daily Sessions (Last 7 Days)</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -102,8 +159,8 @@ export function Analytics() {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-white dark:bg-zinc-800/50 rounded-2xl p-6 border border-gray-200 dark:border-zinc-700"
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-zinc-700 hover:shadow-lg transition-shadow"
         >
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Task Completion Rate</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -151,5 +208,4 @@ export function Analytics() {
   );
 }
 
-// Also add a default export for compatibility
 export default Analytics;

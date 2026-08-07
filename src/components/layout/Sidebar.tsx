@@ -76,11 +76,13 @@ export function Sidebar() {
         w-16 md:w-20
       `}>
         <div className="flex flex-col items-center h-full py-4">
-          {/* Logo - hidden on mobile when menu is closed */}
+          {/* Logo - using image instead of text */}
           <div className="mb-8 mt-12 md:mt-0">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-              F
-            </div>
+            <img 
+              src="iconslogo.png" 
+              alt="FocusForge Logo" 
+              className="w-10 h-10 md:w-12 md:h-12 rounded-xl object-cover shadow-lg"
+            />
           </div>
 
           <nav className="flex-1 space-y-1 md:space-y-2">
