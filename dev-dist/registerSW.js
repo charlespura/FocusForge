@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/FocusForge/dev-sw.js?dev-sw', { scope: '/FocusForge/', type: 'classic' })

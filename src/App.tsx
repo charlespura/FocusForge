@@ -10,11 +10,12 @@ import { Analytics } from './pages/Analytics';
 import { Notes } from './pages/Notes';
 import { Achievements } from './pages/Achievements';
 import { Settings } from './pages/Settings';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import './styles/globals.css';
 
 function App() {
   const { theme } = useThemeStore();
-  const { timeLeft, isRunning, mode, updateTimeLeft } = useGlobalTimerStore();
+  const { timeLeft, isRunning, mode } = useGlobalTimerStore();
 
   useEffect(() => {
     document.documentElement.className = theme === 'dark' ? 'dark' : 'light';
@@ -26,28 +27,11 @@ function App() {
       const mins = Math.floor(timeLeft / 60);
       const secs = timeLeft % 60;
       const timeString = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      document.title = `Timer ${timeString} - FocusForge`;
+      document.title = `⏱️ ${timeString} - FocusForge`;
     } else {
       document.title = 'FocusForge';
     }
   }, [timeLeft, isRunning, mode]);
-
-  // Keep timer running in background even when on other pages
-  useEffect(() => {
-    let interval: number | null = null;
-    
-    if (isRunning) {
-      interval = window.setInterval(() => {
-        updateTimeLeft();
-      }, 250);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isRunning, updateTimeLeft]);
 
   return (
     <HashRouter>
@@ -62,6 +46,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
+      <PWAInstallPrompt />
     </HashRouter>
   );
 }
