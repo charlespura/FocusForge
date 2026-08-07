@@ -1,16 +1,20 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTimerStore } from '../store/timerStore';
 import { useThemeStore } from '../store/themeStore';
 import { useStatisticsStore } from '../store/statisticsStore';
 import { useAchievementStore } from '../store/achievementStore';
-import { Bell, Volume2, Download, Upload, Trash2 } from 'lucide-react';
+import { Bell, Volume2, Download, Upload, Trash2, ShieldCheck, BellRing } from 'lucide-react';
 import { Theme } from '../types';
+import { notificationService } from '../services/notificationService';
 
 export function Settings() {
   const { settings, updateSettings } = useTimerStore();
   const { theme, setTheme } = useThemeStore();
   const { resetData: resetStats } = useStatisticsStore();
   const { resetAchievements } = useAchievementStore();
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   const themes: { label: string; value: Theme }[] = [
     { label: 'Light', value: 'light' },
@@ -22,6 +26,38 @@ export function Settings() {
     { label: 'Midnight', value: 'midnight' },
     { label: 'AMOLED', value: 'amoled' },
   ];
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return;
+    }
+
+    setNotificationPermission(Notification.permission);
+  }, []);
+
+  const handleEnableNotifications = async () => {
+    setIsRequestingPermission(true);
+    const granted = await notificationService.requestPermission();
+    setNotificationPermission(typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : null);
+    setIsRequestingPermission(false);
+
+    if (granted) {
+      notificationService.sendNotification({
+        title: 'Notifications enabled',
+        body: 'FocusForge will now notify you when your timer completes.',
+        requireInteraction: false,
+      });
+    }
+  };
+
+  const handleTestNotification = () => {
+    notificationService.sendNotification({
+      title: 'FocusForge test notification',
+      body: 'If you can see this, your notification setup is working.',
+      requireInteraction: false,
+      tag: 'focusforge-test',
+    });
+  };
 
   const handleExport = () => {
     const data = {
@@ -188,6 +224,49 @@ export function Settings() {
                 onChange={(e) => updateSettings({ alarmSound: e.target.checked })}
                 className="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
               />
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-800/60 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center shrink-0">
+                  <BellRing className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-medium text-gray-900 dark:text-white">Browser Notifications</h3>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300">
+                      {typeof window !== 'undefined' && 'Notification' in window
+                        ? notificationPermission ?? Notification.permission
+                        : 'unsupported'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Let Chrome alert you when a focus session or break ends, even if this tab is in the background.
+                  </p>
+                </div>
+              </div>
+
+              <ShieldCheck className={`w-5 h-5 shrink-0 ${settings.notifications ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'}`} />
+            </div>
+
+            <div className="flex flex-wrap gap-3 mt-4">
+              <button
+                onClick={handleEnableNotifications}
+                disabled={isRequestingPermission || (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted')}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Bell className="w-4 h-4" />
+                {isRequestingPermission ? 'Requesting...' : 'Enable in Chrome'}
+              </button>
+              <button
+                onClick={handleTestNotification}
+                disabled={typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted'}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Send Test
+              </button>
             </div>
           </div>
         </motion.div>

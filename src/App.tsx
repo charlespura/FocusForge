@@ -11,6 +11,7 @@ import { Notes } from './pages/Notes';
 import { Achievements } from './pages/Achievements';
 import { Settings } from './pages/Settings';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { NotificationPermission } from './components/NotificationPermission';
 import './styles/globals.css';
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
         </Routes>
       </Layout>
       <PWAInstallPrompt />
+      <NotificationPermission />
     </HashRouter>
   );
 }

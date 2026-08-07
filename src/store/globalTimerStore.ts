@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useTimerStore } from './timerStore';
+import { notificationService } from '../services/notificationService';
 
 type TimerMode = 'focus' | 'short-break' | 'long-break';
 
@@ -210,6 +212,12 @@ export const useGlobalTimerStore = create<GlobalTimerState>()(
         }));
 
         if (newTimeLeft <= 0) {
+          const { settings } = useTimerStore.getState();
+          if (settings.notifications) {
+            const nextMode = state.mode === 'focus' ? 'break' : 'focus';
+            notificationService.sendTimerCompleteNotification(nextMode, state.completedSessions + (state.mode === 'focus' ? 1 : 0));
+          }
+
           set({
             isRunning: false,
             startTime: null,
