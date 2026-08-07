@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, X } from 'lucide-react';
 
@@ -9,21 +9,20 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(display-mode: standalone)').matches;
+  });
+  const [showPrompt, setShowPrompt] = useState(() => {
+    if (typeof window === 'undefined') return false;
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isDismissed = localStorage.getItem('pwa-prompt-dismissed') === 'true';
+
+    return !isStandalone && !isDismissed;
+  });
 
   useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
-    }
-
-    // Check if user already dismissed
-    if (localStorage.getItem('pwa-prompt-dismissed') === 'true') {
-      return;
-    }
-
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -32,35 +31,42 @@ export function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Check if already installed
-    window.addEventListener('appinstalled', () => {
+    const installedHandler = () => {
       setIsInstalled(true);
       setShowPrompt(false);
-    });
+    };
+
+    window.addEventListener('appinstalled', installedHandler);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
     };
   }, []);
 
-  const handleInstall = async () => {
+  const handleInstall = useCallback(async () => {
     if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const result = await deferredPrompt.userChoice;
-      if (result.outcome === 'accepted') {
-        setShowPrompt(false);
-        setIsInstalled(true);
-        localStorage.setItem('pwa-prompt-dismissed', 'true');
+      try {
+        await deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+          setShowPrompt(false);
+          setIsInstalled(true);
+          localStorage.setItem('pwa-prompt-dismissed', 'true');
+        }
+        setDeferredPrompt(null);
+      } catch (error) {
+        console.error('Install prompt error:', error);
       }
-      setDeferredPrompt(null);
     }
-  };
+  }, [deferredPrompt]);
 
-  const handleDismiss = () => {
+  const handleDismiss = useCallback(() => {
     setShowPrompt(false);
     localStorage.setItem('pwa-prompt-dismissed', 'true');
-  };
+  }, []);
 
+  // Don't render if installed or not showing
   if (isInstalled || !showPrompt) return null;
 
   return (

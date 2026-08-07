@@ -27,6 +27,7 @@ export function PomodoroTimer() {
     resetTimer,
     skipTimer,
     setSelectedTask,
+    updateTimeLeft,
   } = useGlobalTimerStore();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -71,6 +72,18 @@ export function PomodoroTimer() {
       setIsFullscreen(false);
     }
   };
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    updateTimeLeft();
+
+    const intervalId = window.setInterval(() => {
+      updateTimeLeft();
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isRunning, updateTimeLeft]);
 
   // Check if timer finished - include handleSkipTimer in dependencies
   useEffect(() => {
