@@ -109,10 +109,67 @@ export function Settings() {
 
   return (
     <div className="space-y-8">
+      {/* Video Background Section - Full width hero like Dashboard */}
+      <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] mb-8 bg-black/90">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-70"
+          style={{ objectPosition: 'center 40%' }}
+        >
+          <source src="/FocusForge/forge7.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Enhanced gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="px-6 md:px-10 text-white max-w-4xl"
+          >
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
+            >
+              Settings
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
+            >
+              Customize your FocusForge experience
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mt-6 flex justify-center gap-4 flex-wrap"
+            >
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                ⚙️ Preferences
+              </span>
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                🎨 Themes
+              </span>
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                🔔 Notifications
+              </span>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
         <p className="text-gray-500 dark:text-gray-400">Customize your FocusForge experience</p>
@@ -309,7 +366,5 @@ export function Settings() {
     </div>
   );
 }
-// ... all the existing code ...
 
-// Add this at the very end of the file
 export default Settings;

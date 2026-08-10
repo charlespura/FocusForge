@@ -33,7 +33,7 @@ export function PomodoroTimer() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const totalTime = useGlobalTimerStore((state) => state.totalTime);
 
-  const progress = ((totalTime - timeLeft) / totalTime) * 100;
+  const progress = totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
 
   const getModeColor = () => {
     switch (mode) {
@@ -87,7 +87,7 @@ export function PomodoroTimer() {
 
   // Check if timer finished - include handleSkipTimer in dependencies
   useEffect(() => {
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 && isRunning) {
       handleSkipTimer();
     }
   }, [timeLeft, isRunning, handleSkipTimer]);
@@ -121,74 +121,72 @@ export function PomodoroTimer() {
   }, [toggleTimer, resetTimer, handleSkipTimer]);
 
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center min-h-[80vh] transition-all duration-500",
-      isFullscreen && "fixed inset-0 z-50 bg-white dark:bg-zinc-900 min-h-screen"
-    )}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-4xl space-y-8"
-      >
-        {/* Video Background Section */}
-        <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] bg-black/90">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-70"
-            style={{ objectPosition: 'center 40%' }}
+    <div className="space-y-8">
+      {/* Video Background Section - Full width hero like Dashboard */}
+      <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] mb-8 bg-black/90">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-70"
+          style={{ objectPosition: 'center 40%' }}
+        >
+          <source src="/FocusForge/forge2.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Enhanced gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="px-6 md:px-10 text-white max-w-4xl"
           >
-            <source src="/FocusForge/forge2.mp4" type="video/mp4" />
-          </video>
-          
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="px-6 md:px-10 text-white max-w-4xl"
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
             >
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4"
-              >
-                Pomodoro Timer
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
-              >
-                {isRunning ? 'Focus session in progress... 🎯' : 'Ready to focus? 🚀'}
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="mt-6 flex justify-center gap-4 flex-wrap"
-              >
-                <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
-                  ⏱️ {getModeLabel()}
+              Pomodoro Timer
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
+            >
+              {isRunning ? 'Focus session in progress... 🎯' : 'Ready to focus? 🚀'}
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mt-6 flex justify-center gap-4 flex-wrap"
+            >
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                ⏱️ {getModeLabel()}
+              </span>
+              <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
+                {completedSessions} sessions completed
+              </span>
+              {isRunning && (
+                <span className="px-4 py-2 bg-red-500/30 backdrop-blur-sm rounded-full text-sm border border-red-500/30 animate-pulse">
+                  🔴 Live
                 </span>
-                <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
-                  {completedSessions} sessions completed
-                </span>
-                {isRunning && (
-                  <span className="px-4 py-2 bg-red-500/30 backdrop-blur-sm rounded-full text-sm border border-red-500/30 animate-pulse">
-                    🔴 Live
-                  </span>
-                )}
-              </motion.div>
+              )}
             </motion.div>
-          </div>
+          </motion.div>
         </div>
+      </div>
 
-        {/* Timer Controls */}
+      {/* Timer Controls - with proper spacing like Achievements */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
         <div className="text-center">
           <motion.h2
             key={mode}
@@ -203,7 +201,7 @@ export function PomodoroTimer() {
           </p>
         </div>
 
-        <div className="relative">
+        <div className="relative mt-8">
           <div className="w-72 h-72 mx-auto relative">
             <svg className="w-full h-full -rotate-90">
               <circle
@@ -245,7 +243,7 @@ export function PomodoroTimer() {
         </div>
 
         {mode === 'focus' && (
-          <div className="w-full max-w-sm mx-auto">
+          <div className="w-full max-w-sm mx-auto mt-6">
             <select
               value={selectedTask}
               onChange={(e) => setSelectedTask(e.target.value)}
@@ -259,7 +257,7 @@ export function PomodoroTimer() {
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-3 flex-wrap">
+        <div className="flex items-center justify-center gap-3 flex-wrap mt-6">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -297,7 +295,7 @@ export function PomodoroTimer() {
           </motion.button>
         </div>
 
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400 space-x-3">
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400 space-x-3 mt-4">
           <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">Space</kbd>
           <span>Start/Pause</span>
           <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">R</kbd>
