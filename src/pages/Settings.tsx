@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTimerStore } from '../store/timerStore';
 import { useThemeStore } from '../store/themeStore';
@@ -13,7 +13,16 @@ export function Settings() {
   const { theme, setTheme } = useThemeStore();
   const { resetData: resetStats } = useStatisticsStore();
   const { resetAchievements } = useAchievementStore();
-  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
+
+  const [notificationPermission, setNotificationPermission] =
+    useState<NotificationPermission>(() => {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        return Notification.permission;
+      }
+
+      return 'default';
+    });
+
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   const themes: { label: string; value: Theme }[] = [
@@ -27,26 +36,25 @@ export function Settings() {
     { label: 'AMOLED', value: 'amoled' },
   ];
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      return;
-    }
-
-    setNotificationPermission(Notification.permission);
-  }, []);
-
   const handleEnableNotifications = async () => {
     setIsRequestingPermission(true);
-    const granted = await notificationService.requestPermission();
-    setNotificationPermission(typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : null);
-    setIsRequestingPermission(false);
 
-    if (granted) {
-      notificationService.sendNotification({
-        title: 'Notifications enabled',
-        body: 'FocusForge will now notify you when your timer completes.',
-        requireInteraction: false,
-      });
+    try {
+      const granted = await notificationService.requestPermission();
+
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        setNotificationPermission(Notification.permission);
+      }
+
+      if (granted) {
+        notificationService.sendNotification({
+          title: 'Notifications enabled',
+          body: 'FocusForge will now notify you when your timer completes.',
+          requireInteraction: false,
+        });
+      }
+    } finally {
+      setIsRequestingPermission(false);
     }
   };
 
@@ -68,33 +76,45 @@ export function Settings() {
       theme: localStorage.getItem('theme-storage'),
       settings: localStorage.getItem('timer-settings'),
     };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    const blob = new Blob(
+      [JSON.stringify(data, null, 2)],
+      { type: 'application/json' }
+    );
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+
     a.href = url;
     a.download = `focusforge-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
+
     URL.revokeObjectURL(url);
   };
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+
     if (!file) return;
 
     const reader = new FileReader();
+
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
+
         Object.entries(data).forEach(([key, value]) => {
           if (value) {
             localStorage.setItem(key, JSON.stringify(value));
           }
         });
+
         window.location.reload();
       } catch {
         alert('Invalid backup file');
       }
     };
+
     reader.readAsText(file);
   };
 
@@ -109,7 +129,7 @@ export function Settings() {
 
   return (
     <div className="space-y-8">
-      {/* Video Background Section - Full width hero like Dashboard */}
+      {/* Video Background Section */}
       <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] mb-8 bg-black/90">
         <video
           autoPlay
@@ -121,8 +141,7 @@ export function Settings() {
         >
           <source src="/FocusForge/forge7.mp4" type="video/mp4" />
         </video>
-        
-        {/* Enhanced gradient overlay for better text readability */}
+
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -138,6 +157,7 @@ export function Settings() {
             >
               Settings
             </motion.h1>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -146,6 +166,7 @@ export function Settings() {
             >
               Customize your FocusForge experience
             </motion.p>
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -155,9 +176,11 @@ export function Settings() {
               <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
                 ⚙️ Preferences
               </span>
+
               <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
                 🎨 Themes
               </span>
+
               <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
                 🔔 Notifications
               </span>
@@ -171,155 +194,294 @@ export function Settings() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        <p className="text-gray-500 dark:text-gray-400">Customize your FocusForge experience</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Settings
+        </h1>
+
+        <p className="text-gray-500 dark:text-gray-400">
+          Customize your FocusForge experience
+        </p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Timer Settings */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-2xl p-6"
         >
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Timer Settings</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Timer Settings
+          </h2>
+
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-500 dark:text-gray-400">Focus Time (minutes)</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Focus Time (minutes)
+              </label>
+
               <input
                 type="number"
                 min="1"
                 max="120"
-                value={settings.focusTime}
-                onChange={(e) => updateSettings({ focusTime: parseInt(e.target.value) || 25 })}
+                value={settings.focusTime === 0 ? '' : settings.focusTime}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (value === '') {
+                    updateSettings({ focusTime: 0 });
+                  } else {
+                    const num = Number(value);
+
+                    if (!isNaN(num) && num >= 0) {
+                      updateSettings({ focusTime: num });
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = parseInt(e.target.value);
+
+                  if (isNaN(value) || value < 1) {
+                    updateSettings({ focusTime: 25 });
+                  }
+                }}
                 className="w-full px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500 mt-1 text-gray-900 dark:text-white"
               />
             </div>
+
             <div>
-              <label className="text-sm text-gray-500 dark:text-gray-400">Short Break (minutes)</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Short Break (minutes)
+              </label>
+
               <input
                 type="number"
                 min="1"
                 max="30"
-                value={settings.shortBreak}
-                onChange={(e) => updateSettings({ shortBreak: parseInt(e.target.value) || 5 })}
+                value={settings.shortBreak === 0 ? '' : settings.shortBreak}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (value === '') {
+                    updateSettings({ shortBreak: 0 });
+                  } else {
+                    const num = Number(value);
+
+                    if (!isNaN(num) && num >= 0) {
+                      updateSettings({ shortBreak: num });
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = parseInt(e.target.value);
+
+                  if (isNaN(value) || value < 1) {
+                    updateSettings({ shortBreak: 5 });
+                  }
+                }}
                 className="w-full px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500 mt-1 text-gray-900 dark:text-white"
               />
             </div>
+
             <div>
-              <label className="text-sm text-gray-500 dark:text-gray-400">Long Break (minutes)</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Long Break (minutes)
+              </label>
+
               <input
                 type="number"
                 min="1"
                 max="60"
-                value={settings.longBreak}
-                onChange={(e) => updateSettings({ longBreak: parseInt(e.target.value) || 15 })}
+                value={settings.longBreak === 0 ? '' : settings.longBreak}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (value === '') {
+                    updateSettings({ longBreak: 0 });
+                  } else {
+                    const num = Number(value);
+
+                    if (!isNaN(num) && num >= 0) {
+                      updateSettings({ longBreak: num });
+                    }
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = parseInt(e.target.value);
+
+                  if (isNaN(value) || value < 1) {
+                    updateSettings({ longBreak: 15 });
+                  }
+                }}
                 className="w-full px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500 mt-1 text-gray-900 dark:text-white"
               />
             </div>
+
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-500 dark:text-gray-400">Auto-start Break</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Auto-start Break
+              </label>
+
               <input
                 type="checkbox"
                 checked={settings.autoStartBreak}
-                onChange={(e) => updateSettings({ autoStartBreak: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ autoStartBreak: e.target.checked })
+                }
                 className="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
               />
             </div>
+
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-500 dark:text-gray-400">Auto-start Focus</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Auto-start Focus
+              </label>
+
               <input
                 type="checkbox"
                 checked={settings.autoStartFocus}
-                onChange={(e) => updateSettings({ autoStartFocus: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ autoStartFocus: e.target.checked })
+                }
                 className="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
               />
             </div>
           </div>
         </motion.div>
 
+        {/* Appearance */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-2xl p-6"
         >
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Appearance</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Appearance
+          </h2>
+
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-500 dark:text-gray-400">Theme</label>
+              <label className="text-sm text-gray-500 dark:text-gray-400">
+                Theme
+              </label>
+
               <select
                 value={theme}
                 onChange={(e) => setTheme(e.target.value as Theme)}
                 className="w-full px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-red-500 mt-1 text-gray-900 dark:text-white"
               >
                 {themes.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
             </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bell className="w-5 h-5 text-gray-500" />
-                <label className="text-sm text-gray-500 dark:text-gray-400">Notifications</label>
+
+                <label className="text-sm text-gray-500 dark:text-gray-400">
+                  Notifications
+                </label>
               </div>
+
               <input
                 type="checkbox"
                 checked={settings.notifications}
-                onChange={(e) => updateSettings({ notifications: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ notifications: e.target.checked })
+                }
                 className="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
               />
             </div>
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Volume2 className="w-5 h-5 text-gray-500" />
-                <label className="text-sm text-gray-500 dark:text-gray-400">Alarm Sound</label>
+
+                <label className="text-sm text-gray-500 dark:text-gray-400">
+                  Alarm Sound
+                </label>
               </div>
+
               <input
                 type="checkbox"
                 checked={settings.alarmSound}
-                onChange={(e) => updateSettings({ alarmSound: e.target.checked })}
+                onChange={(e) =>
+                  updateSettings({ alarmSound: e.target.checked })
+                }
                 className="w-5 h-5 rounded border-gray-300 text-red-500 focus:ring-red-500"
               />
             </div>
           </div>
 
+          {/* Browser Notifications */}
           <div className="mt-6 rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-800/60 p-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-red-500/10 dark:bg-red-500/20 flex items-center justify-center shrink-0">
                   <BellRing className="w-5 h-5 text-red-500" />
                 </div>
+
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-medium text-gray-900 dark:text-white">Browser Notifications</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-white">
+                      Browser Notifications
+                    </h3>
+
                     <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300">
-                      {typeof window !== 'undefined' && 'Notification' in window
-                        ? notificationPermission ?? Notification.permission
+                      {typeof window !== 'undefined' &&
+                      'Notification' in window
+                        ? notificationPermission
                         : 'unsupported'}
                     </span>
                   </div>
+
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Let Chrome alert you when a focus session or break ends, even if this tab is in the background.
+                    Let Chrome alert you when a focus session or break ends,
+                    even if this tab is in the background.
                   </p>
                 </div>
               </div>
 
-              <ShieldCheck className={`w-5 h-5 shrink-0 ${settings.notifications ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'}`} />
+              <ShieldCheck
+                className={`w-5 h-5 shrink-0 ${
+                  settings.notifications
+                    ? 'text-green-500'
+                    : 'text-gray-300 dark:text-gray-600'
+                }`}
+              />
             </div>
 
             <div className="flex flex-wrap gap-3 mt-4">
               <button
                 onClick={handleEnableNotifications}
-                disabled={isRequestingPermission || (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted')}
+                disabled={
+                  isRequestingPermission ||
+                  (typeof window !== 'undefined' &&
+                    'Notification' in window &&
+                    Notification.permission === 'granted')
+                }
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Bell className="w-4 h-4" />
-                {isRequestingPermission ? 'Requesting...' : 'Enable in Chrome'}
+
+                {isRequestingPermission
+                  ? 'Requesting...'
+                  : 'Enable in Chrome'}
               </button>
+
               <button
                 onClick={handleTestNotification}
-                disabled={typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted'}
+                disabled={
+                  typeof window !== 'undefined' &&
+                  'Notification' in window &&
+                  Notification.permission !== 'granted'
+                }
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Send Test
@@ -329,13 +491,17 @@ export function Settings() {
         </motion.div>
       </div>
 
+      {/* Data Management */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
         className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-2xl p-6"
       >
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Data Management</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Data Management
+        </h2>
+
         <div className="flex flex-wrap gap-4">
           <button
             onClick={handleExport}
@@ -344,9 +510,11 @@ export function Settings() {
             <Download className="w-5 h-5" />
             Export Data
           </button>
+
           <label className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors cursor-pointer">
             <Upload className="w-5 h-5" />
             Import Data
+
             <input
               type="file"
               accept=".json"
@@ -354,6 +522,7 @@ export function Settings() {
               className="hidden"
             />
           </label>
+
           <button
             onClick={handleReset}
             className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
