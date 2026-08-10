@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, SkipForward, Maximize2 } from 'lucide-react';
 import { useTimerStore } from '../store/timerStore';
@@ -7,7 +7,6 @@ import { useStatisticsStore } from '../store/statisticsStore';
 import { useGoalStore } from '../store/goalStore';
 import { useAchievementStore } from '../store/achievementStore';
 import { useGlobalTimerStore } from '../store/globalTimerStore';
-import { cn } from '../utils/cn';
 
 export function PomodoroTimer() {
   const { settings } = useTimerStore();
@@ -30,49 +29,80 @@ export function PomodoroTimer() {
     updateTimeLeft,
   } = useGlobalTimerStore();
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const totalTime = useGlobalTimerStore((state) => state.totalTime);
 
-  const progress = totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
+  const progress =
+    totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0;
 
   const getModeColor = () => {
     switch (mode) {
-      case 'focus': return 'text-red-500';
-      case 'short-break': return 'text-green-500';
-      case 'long-break': return 'text-blue-500';
-      default: return 'text-red-500';
+      case 'focus':
+        return 'text-red-500';
+      case 'short-break':
+        return 'text-green-500';
+      case 'long-break':
+        return 'text-blue-500';
+      default:
+        return 'text-red-500';
     }
   };
 
   const getModeLabel = () => {
     switch (mode) {
-      case 'focus': return 'Focus Time';
-      case 'short-break': return 'Short Break';
-      case 'long-break': return 'Long Break';
+      case 'focus':
+        return 'Focus Time';
+      case 'short-break':
+        return 'Short Break';
+      case 'long-break':
+        return 'Long Break';
+      default:
+        return 'Focus Time';
     }
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  // Wrap handleSkipTimer in useCallback to prevent unnecessary re-renders
+  // Handle skipping the current timer
   const handleSkipTimer = useCallback(() => {
-    skipTimer(settings, incrementPomodoros, incrementSessions, addFocusTime, incrementProgress, updateStreak, unlockAchievement);
-  }, [skipTimer, settings, incrementPomodoros, incrementSessions, addFocusTime, incrementProgress, updateStreak, unlockAchievement]);
+    skipTimer(
+      settings,
+      incrementPomodoros,
+      incrementSessions,
+      addFocusTime,
+      incrementProgress,
+      updateStreak,
+      unlockAchievement
+    );
+  }, [
+    skipTimer,
+    settings,
+    incrementPomodoros,
+    incrementSessions,
+    addFocusTime,
+    incrementProgress,
+    updateStreak,
+    unlockAchievement,
+  ]);
 
+  // Handle fullscreen mode
   const handleToggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
+      document.documentElement.requestFullscreen().catch((error) => {
+        console.error('Failed to enter fullscreen:', error);
+      });
     } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+      document.exitFullscreen().catch((error) => {
+        console.error('Failed to exit fullscreen:', error);
+      });
     }
   };
 
+  // Update timer every second while running
   useEffect(() => {
     if (!isRunning) return;
 
@@ -85,44 +115,52 @@ export function PomodoroTimer() {
     return () => window.clearInterval(intervalId);
   }, [isRunning, updateTimeLeft]);
 
-  // Check if timer finished - include handleSkipTimer in dependencies
+  // Check if timer has finished
   useEffect(() => {
     if (timeLeft <= 0 && isRunning) {
       handleSkipTimer();
     }
   }, [timeLeft, isRunning, handleSkipTimer]);
 
-  // Keyboard shortcuts effect
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Space') {
         e.preventDefault();
         toggleTimer();
       }
+
       if (e.key === 'r' || e.key === 'R') {
         resetTimer();
       }
+
       if (e.key === 's' || e.key === 'S') {
         handleSkipTimer();
       }
+
       if (e.key === 'f' || e.key === 'F') {
         handleToggleFullscreen();
       }
+
       if (e.key === 'Escape') {
         if (document.fullscreenElement) {
-          document.exitFullscreen();
-          setIsFullscreen(false);
+          document.exitFullscreen().catch((error) => {
+            console.error('Failed to exit fullscreen:', error);
+          });
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [toggleTimer, resetTimer, handleSkipTimer]);
 
   return (
     <div className="space-y-8">
-      {/* Video Background Section - Full width hero like Dashboard */}
+      {/* Video Background Section */}
       <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] mb-8 bg-black/90">
         <video
           autoPlay
@@ -134,8 +172,8 @@ export function PomodoroTimer() {
         >
           <source src="/FocusForge/forge2.mp4" type="video/mp4" />
         </video>
-        
-        {/* Enhanced gradient overlay for better text readability */}
+
+        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/50 flex flex-col items-center justify-center text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -151,14 +189,18 @@ export function PomodoroTimer() {
             >
               Pomodoro Timer
             </motion.h1>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto"
             >
-              {isRunning ? 'Focus session in progress... 🎯' : 'Ready to focus? 🚀'}
+              {isRunning
+                ? 'Focus session in progress... 🎯'
+                : 'Ready to focus? 🚀'}
             </motion.p>
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -168,9 +210,11 @@ export function PomodoroTimer() {
               <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
                 ⏱️ {getModeLabel()}
               </span>
+
               <span className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm border border-white/20">
                 {completedSessions} sessions completed
               </span>
+
               {isRunning && (
                 <span className="px-4 py-2 bg-red-500/30 backdrop-blur-sm rounded-full text-sm border border-red-500/30 animate-pulse">
                   🔴 Live
@@ -181,7 +225,7 @@ export function PomodoroTimer() {
         </div>
       </div>
 
-      {/* Timer Controls - with proper spacing like Achievements */}
+      {/* Timer Controls */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -196,11 +240,13 @@ export function PomodoroTimer() {
           >
             {getModeLabel()}
           </motion.h2>
+
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {completedSessions} sessions completed today
           </p>
         </div>
 
+        {/* Timer Circle */}
         <div className="relative mt-8">
           <div className="w-72 h-72 mx-auto relative">
             <svg className="w-full h-full -rotate-90">
@@ -213,6 +259,7 @@ export function PomodoroTimer() {
                 strokeWidth="8"
                 className="text-gray-200 dark:text-zinc-700"
               />
+
               <circle
                 cx="50%"
                 cy="50%"
@@ -222,10 +269,15 @@ export function PomodoroTimer() {
                 strokeWidth="8"
                 strokeLinecap="round"
                 className={getModeColor()}
-                strokeDasharray={`${2 * Math.PI * 45 * (progress / 100)} ${2 * Math.PI * 45 * (1 - progress / 100)}`}
-                style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                strokeDasharray={`${
+                  2 * Math.PI * 45 * (progress / 100)
+                } ${2 * Math.PI * 45 * (1 - progress / 100)}`}
+                style={{
+                  transition: 'stroke-dasharray 0.5s ease',
+                }}
               />
             </svg>
+
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <motion.span
                 key={timeLeft}
@@ -235,6 +287,7 @@ export function PomodoroTimer() {
               >
                 {formatTime(timeLeft)}
               </motion.span>
+
               <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {Math.round(progress)}% complete
               </span>
@@ -242,6 +295,7 @@ export function PomodoroTimer() {
           </div>
         </div>
 
+        {/* Task Selection */}
         {mode === 'focus' && (
           <div className="w-full max-w-sm mx-auto mt-6">
             <select
@@ -250,13 +304,19 @@ export function PomodoroTimer() {
               className="w-full px-4 py-2 rounded-xl bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="">Select a task to focus on...</option>
-              {tasks.filter(t => !t.completed).map(task => (
-                <option key={task.id} value={task.id}>{task.title}</option>
-              ))}
+
+              {tasks
+                .filter((task) => !task.completed)
+                .map((task) => (
+                  <option key={task.id} value={task.id}>
+                    {task.title}
+                  </option>
+                ))}
             </select>
           </div>
         )}
 
+        {/* Timer Buttons */}
         <div className="flex items-center justify-center gap-3 flex-wrap mt-6">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -264,7 +324,11 @@ export function PomodoroTimer() {
             onClick={toggleTimer}
             className="w-16 h-16 rounded-full bg-red-500 text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-colors flex items-center justify-center"
           >
-            {isRunning ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
+            {isRunning ? (
+              <Pause className="w-8 h-8" />
+            ) : (
+              <Play className="w-8 h-8 ml-1" />
+            )}
           </motion.button>
 
           <motion.button
@@ -295,14 +359,26 @@ export function PomodoroTimer() {
           </motion.button>
         </div>
 
+        {/* Keyboard Shortcuts */}
         <div className="text-center text-sm text-gray-500 dark:text-gray-400 space-x-3 mt-4">
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">Space</kbd>
+          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">
+            Space
+          </kbd>
           <span>Start/Pause</span>
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">R</kbd>
+
+          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">
+            R
+          </kbd>
           <span>Reset</span>
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">S</kbd>
+
+          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">
+            S
+          </kbd>
           <span>Skip</span>
-          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">F</kbd>
+
+          <kbd className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 rounded">
+            F
+          </kbd>
           <span>Fullscreen</span>
         </div>
       </motion.div>
@@ -311,3 +387,4 @@ export function PomodoroTimer() {
 }
 
 export default PomodoroTimer;
+
